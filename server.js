@@ -24,17 +24,15 @@ app.post('/api/exercise/new-user', (req, res, next) => {
   const username = req.body.username;
   if(username){
     const newUser = {username: username, count: 0, log: []};
-    // maybe try to find the newUser.username in the database and not newUser
-    // also, it could be used findOne
-    User.find(newUser, (error, data) => {
+    User.findOne({username : newUser.username}, (error, data) => {
       if (error) return next(error);
-      if (data.length === 0) {
+      if (data) {
+        res.send("That username is already taken.");
+      } else {
         User.create(newUser, (error, user) => {
           if (error) return next(error);
           res.json({username: user.username, id: user._id});
         });
-      } else {
-        res.send("That username is already taken.");
       }
     });
   } else {
