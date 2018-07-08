@@ -56,7 +56,6 @@ app.post('/api/exercise/add', (req, res, next) => {
         user.log.push(newExercise);
         user.save((error, user) => {
           if(error) return next(error);
-          // const dataToShow = {username: user.username, _id: user._id, ...newExercise };
           const dataToShow = { 
             username: user.username,
             _id: user._id,
@@ -78,34 +77,28 @@ app.post('/api/exercise/add', (req, res, next) => {
 
 app.get('/api/exercise/log', (req, res, next) =>{
   // TO DO: Verify the input data
+  // Add error handling for this (pointed out by sculprog at freecodecamp forum):
+  // Cast to ObjectId failed for value "5b417475e895590053eb6cd0aaa" at path "_id" for model "User".
+
   const userId = req.query.userId;
   if(userId){
     let from = req.query.from;
     let to = req.query.to;
     let limit = req.query.limit;
            
-    /*     
-    const matchOptions = {};
-    if (from && to) {
-      from = new Date(from);
-      to = new Date(to);
-      matchOptions.date = {$gte: from, $lte: to}
-    } else if (from) {
-      from = new Date(from);
-      matchOptions.date = {$gte: from};
-    } else if (to) {
-      to = new Date(to);
-      matchOptions.date = {$lte: to};
-    }
-    */
-    
     const limitOptions = {};
     if (limit) limitOptions.limit = limit;
-    
+    // console.error('Testing invalid userId. Before looking for the user.')
+    // console.error('userId: ' + userId);
     User.findById(userId)
       .populate({path: 'log', match: {}, select : '-_id', options: limitOptions})
       .exec((error, user) => {
-        if(error) return next(error);
+      
+        console.error('Testing invalid userId. After looking for the user, before if(error) and if(user).')
+        console.error('error: ' + error);
+        console.error('user: ' + user);
+      
+      if(error) return next(error);  // Acá sale el error.
         if (user){
           const dataToShow = {id: user._id, username: user.username, count: user.count};
           if (from) dataToShow.from = from.toDateString();
